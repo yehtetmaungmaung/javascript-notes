@@ -1,6 +1,6 @@
 function rangeOfNumber(start, end) {
     if (start > end) {
-        return "StartNum must not be greater than EndNum!";
+        return "StartNum must not be greater than End";
     } else if (start === end) {
         return [end];
     } else {
@@ -10,4 +10,4 @@ function rangeOfNumber(start, end) {
     }
 }
 
-console.log(rangeOfNumber(1, 0));
+console.log(rangeOfNumber(1, 10));
