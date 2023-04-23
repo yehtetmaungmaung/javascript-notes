@@ -1,0 +1,4 @@
+<h1>
+    <%= it.title %>
+    <%= it.count %>
+</h1>
