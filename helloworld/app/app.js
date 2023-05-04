@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
 import { configure, renderFile } from "https://deno.land/x/eta@v2.0.0/mod.ts";
-import { extractPerson } from "./utils/formUtils.js";
-import * as peopleService from "./services/peopleService.js"
 
 configure({
   views: `${Deno.cwd()}/views/`,
@@ -11,19 +9,29 @@ const responseDetails = {
   headers: { "Content-Type": "text/html;charset=UTF-8" },
 };
 
-const addPerson = async (request) => {
-  const person = await extractPerson(request);
-  peopleService.add(person);
+const data = {
+  names: [],
+};
+
+const redirectTo = (path) => {
+  return new Response(`Redirecting to ${path}.`, {
+    status: 303,
+    headers: {
+      "Location": path,
+    },
+  });
+};
+
+const addName = async (request) => {
+  const formData = await request.formData();
+  data.names.push(formData.get("name"));
 };
 
 const handleRequest = async (request) => {
   if (request.method === "POST") {
-    await addPerson(request);
+    await addName(request);
+    return redirectTo(request.url);
   }
-
-  const data = {
-    people: peopleService.findAll(),
-  };
 
   return new Response(await renderFile("index.eta", data), responseDetails);
 };
