@@ -1,11 +1,31 @@
 import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
-import postgres from "https://deno.land/x/postgresjs@v3.3.3/mod.js";
+import { configure, renderFile } from "https://deno.land/x/eta@v2.0.0/mod.ts";
+import { extractPerson } from "./utils/formUtils.js";
+import * as peopleService from "./services/peopleService.js"
 
-const sql = postgres({});
-const handleRequest = async (request) => {
-  const rows = await sql`SELECT COUNT(*) AS c FROM users`;
-  console.log(Deno.env.get("PGHOST"));
-  console.log(Deno.env.get("PGPASSWORD"));
-  return new Response(`Meaning of life: ${rows[0].c}`);
+configure({
+  views: `${Deno.cwd()}/views/`,
+});
+
+const responseDetails = {
+  headers: { "Content-Type": "text/html;charset=UTF-8" },
 };
+
+const addPerson = async (request) => {
+  const person = await extractPerson(request);
+  peopleService.add(person);
+};
+
+const handleRequest = async (request) => {
+  if (request.method === "POST") {
+    await addPerson(request);
+  }
+
+  const data = {
+    people: peopleService.findAll(),
+  };
+
+  return new Response(await renderFile("index.eta", data), responseDetails);
+};
+
 serve(handleRequest, { port: 7777 });

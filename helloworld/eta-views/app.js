@@ -2,32 +2,34 @@ import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
 import { configure, renderFile } from "https://deno.land/x/eta@v2.0.0/mod.ts";
 
 configure({
-    views: `${Deno.cwd()}/views/`,
+  views: `${Deno.cwd()}/views/`,
 });
 
-
 const responseDetails = {
-    headers: {
-        "Content-Type": "text/html;charset=UTF-8",
-    },
+  headers: { "Content-Type": "text/html;charset=UTF-8" },
 };
 
-let visitCount = 0;
+const data = {
+  people: [],
+};
+
+const addPerson = async (request) => {
+  const formData = await request.formData();
+
+  const person = {
+    name: formData.get("name"),
+    address: formData.get("address"),
+  };
+
+  data.people.push(person);
+};
 
 const handleRequest = async (request) => {
-    const url = new URL(request.url);
-    if (url.pathname === "/") {
-        visitCount++;
+  if (request.method === "POST") {
+    await addPerson(request);
+  }
 
-        const data = {
-            count: visitCount,
-            title: "Counter!",
-        };
-
-        return new Response(await renderFile("index.eta", data), responseDetails);
-    } else  {
-        return new Response("Not found", { status: 404 });
-    }
+  return new Response(await renderFile("index.eta", data), responseDetails);
 };
 
 serve(handleRequest, { port: 7777 });
