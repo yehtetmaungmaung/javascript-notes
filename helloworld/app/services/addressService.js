@@ -16,4 +16,12 @@ const findByNameOrAddressLike = async (nameOrAddress) => {
         WHERE name ILIKE ${ likePart } OR address ILIKE ${ likePart }`;
 };
 
-export { create, findByNameOrAddressLike };
+const findAll = async() => {
+    return await sql`SELECT * FROM addresses`;
+}
+
+const deleteById = async (id) => {
+    await sql`DELETE FROM addresses WHERE id = ${ id }`;
+};
+
+export { create, findByNameOrAddressLike, findAll, deleteById };
