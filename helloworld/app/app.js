@@ -1,9 +1,10 @@
-import postgres from "https://deno.land/x/postgresjs@v3.3.3/mod.js";
+import * as addressService from "./services/addressService.js";
 
-const sql = postgres({});
+await addressService.create("Donald Duck", "Duckburg");
+await addressService.create("Daisy Duck", "Duckburg");
 
-const rows = await sql`SELECT * FROM names`;
+let result = await addressService.findByNameOrAddressLike("daisy");
+console.log(result);
 
-rows.forEach((obj) => {
-  console.log(obj.name);
-});
+result = await addressService.findByNameOrAddressLike("duckb");
+console.log(result);
