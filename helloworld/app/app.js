@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
 import { configure, renderFile } from "https://deno.land/x/eta@v2.0.0/mod.ts";
-import * as nameService from "./services/nameService.js";
+import * as addressService from "./services/addressService.js";
 
 configure({
   views: `${Deno.cwd()}/views/`,
@@ -11,7 +11,7 @@ const responseDetails = {
 };
 
 const redirectTo = (path) => {
-  return new Response("-", {
+  return new Response(`Redirecting to ${path}.`, {
     status: 303,
     headers: {
       "Location": path,
@@ -19,42 +19,43 @@ const redirectTo = (path) => {
   });
 };
 
-const listNames = async (request) => {
+const addAddress = async (request) => {
+  const formData = await request.formData();
+
+  const name = formData.get("name");
+  const address = formData.get("address");
+
+  await addressService.create(name, address);
+  return redirectTo("/");
+};
+
+const deleteAddress = async (request) => {
+  const url = new URL(request.url);
+  const parts = url.pathname.split("/");
+  console.log(parts);
+  const id = parts[2];
+  await addressService.deleteById(id);
+
+  return redirectTo("/");
+}
+
+const listAddresses = async (request) => {
   const data = {
-    names: await nameService.findAll(),
+    addresses: await addressService.findAll(),
   };
 
   return new Response(await renderFile("index.eta", data), responseDetails);
 };
 
-const addName = async (request) => {
-  const formData = await request.formData();
-  const name = formData.get("name");
-  await nameService.create(name);
-
-  return redirectTo("/names");
-};
-
-
-const deleteName = async (request) => {
-  const url = new URL(request.url);
-  const parts = url.pathname.split("/");
-  const id = parts[2];
-  await nameService.deleteById(id);
-  return redirectTo("/names");
-}
-
-
 const handleRequest = async (request) => {
   const url = new URL(request.url);
-  if (request.method === "GET" && url.pathname === "/names") {
-    return await listNames(request);
 
-  } else if (request.method === "POST" && url.pathname.startsWith("/names/") && url.pathname.endsWith("/delete")) {
-    return await deleteName(request);
-
-  } else if (request.method === "POST" && url.pathname === "/names") {
-    return await addName(request);
+  if (request.method === "POST" && url.pathname.startsWith("/delete/")) {
+    return await deleteAddress(request);
+  } else if (request.method === "POST") {
+    return await addAddress(request);
+  } else {
+    return await listAddresses(request);
   }
 };
 
