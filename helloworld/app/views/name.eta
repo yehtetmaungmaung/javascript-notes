@@ -11,3 +11,7 @@
     </form>
   <% }); %>
 </ul>
+
+<h1>Addresses</h1>
+
+<h2>Total names: <%= it.count %></h2>

@@ -1,6 +1,4 @@
-import postgres from "https://deno.land/x/postgresjs@v3.3.3/mod.js";
-
-const sql = postgres({});
+import {sql} from "../database/database.js";
 
 const create = async (name, address) => {
     await sql`INSERT INTO addresses
@@ -21,7 +19,17 @@ const findAll = async() => {
 }
 
 const deleteById = async (id) => {
-    await sql`DELETE FROM addresses WHERE id = ${ id }`;
+    try {
+        await sql`DELETE FROM addresses WHERE id = ${ id }`;
+    } catch (e) {
+        console.log(e);
+    }
 };
 
-export { create, findByNameOrAddressLike, findAll, deleteById };
+const countAddresses = async() => {
+    const rows = await sql`SELECT COUNT(*) AS count FROM addresses`;
+    console.log(rows);
+    return rows[0].count;
+}
+
+export { create, findByNameOrAddressLike, findAll, deleteById, countAddresses};
