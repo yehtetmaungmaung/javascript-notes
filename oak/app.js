@@ -4,27 +4,14 @@ const app = new Application();
 
 const router = new Router();
 
-
-const isInCalendar = ({params, response}) => {
-    const date = new Date(
-        Number(params.year),
-        Number(params.month) - 1,
-        Number(params.day),
-    );
-
-    console.log(date);
-    if (
-        date.getFullYear() == params.year &&
-        date.getMonth() + 1 == params.month &&
-        date.getDate() == params.day
-    ) {
-        response.body = "The day is in the calendar!";
+const requestParamId = ({ request, response }) => {
+    if (request.url.searchParams.has("id")) {
+        response.body = request.url.searchParams.get("id");
     } else {
-        response.body = "The day is not in the calendar!";
+        response.body = "Not defined";
     }
 };
 
-
-router.get("/year/:year/month/:month/day/:day", isInCalendar)
+router.get("/", requestParamId);
 app.use(router.routes());
 app.listen({ port: 7777 });
